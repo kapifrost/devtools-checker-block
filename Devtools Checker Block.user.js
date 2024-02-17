@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Devtools Checker Block
 // @namespace    http://kapifrost.github.io/
-// @downloadURL  https://github.com/kapifrost/devtools-checker-block/raw/main/Devtools%20Checker%20Block.user.js
-// @updateURL    https://github.com/kapifrost/devtools-checker-block/raw/main/Devtools%20Checker%20Block.user.js
-// @version      1.0
+// @downloadURL  https://github.com/
+// @updateURL    https://github.com/
+// @version      1.1
 // @description  Block common DevTools Checker methods
 // @author       kapifrost
 // @match        *://*/*
@@ -41,9 +41,29 @@
     // https://github.com/AEPKILL/devtools-detector/
     window.performance = window.performance || {};
     window.performance.now = () => { return 0; }
-    window.console.log.apply = () => {}
-    window.console.table.apply = () => {}
+    const originalConsoleLog = window.console.log;
+    const nativeCode = (function() {}).toString.toString();
+    window.console.log = function(object) {
+        if (arguments.length == 50 || object.length == 50 || object.outerHTML == '<div></div>' || object?.toString?.toString() != nativeCode) {
+            return;
+        }
+        return console.log(...arguments);
+    }
+    const originalConsoleTable = window.console.table;
+    window.console.table = function(table) {
+        if (table.length == 50) {
+            return;
+        }
+        if (table?.dep?.toString.toString() != nativeCode) {
+            return;
+        }
+        return originalConsoleTable.apply(this, arguments);
+    }
+    window.console.clear = () => {}
     window.console.clear.apply = () => {}
+
+    // https://github.com/theajack/disable-devtool/
+    window.Date.prototype.getTime = () => { return 0; }
 
     // Strict window size DevTools Checker (Not Recommended)
     // https://github.com/sindresorhus/devtools-detect/
@@ -75,8 +95,13 @@
 
     // https://github.com/david-fong/detect-devtools-via-debugger-heartstop/
     const originalBlob = Blob;
+    const blockBlobContents = [
+        'debugger', // https://github.com/david-fong/detect-devtools-via-debugger-heartstop/
+        'performance.now()', // https://github.com/AEPKILL/devtools-detector/blob/master/src/classes/worker-console.ts#L53
+    ];
     window.Blob = function() {
-        if ([...arguments[0]].some((e) => e && typeof(e) === 'string' && e?.includes("debugger"))) {
+        console.log(arguments[0]);
+        if ([...arguments[0]].some((e) => e && typeof(e) === 'string' && (e.includes && blockBlobContents.some((e) => e.includes(e))))) {
             return new originalBlob(['']);
         }
         return new originalBlob(...arguments);
