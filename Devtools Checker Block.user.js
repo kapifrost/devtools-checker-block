@@ -61,6 +61,7 @@
     }
     window.console.clear = () => {}
     window.console.clear.apply = () => {}
+    const originalTimeout = window.setTimeout;
 
     // https://github.com/theajack/disable-devtool/
     window.Date.prototype.getTime = () => { return 0; }
@@ -105,5 +106,16 @@
             return new originalBlob(['']);
         }
         return new originalBlob(...arguments);
+    }
+})();
+
+(function() {
+    // Various Websites
+    const originalEval = eval;
+    window.eval = function(code) {
+        if (code == "debugger" || code?.includes('debugger')) {
+            return;
+        }
+        originalEval(code);
     }
 })();
