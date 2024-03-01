@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Devtools Checker Block
 // @namespace    http://kapifrost.github.io/
-// @downloadURL  https://github.com/
-// @updateURL    https://github.com/
+// @downloadURL  https://github.com/kapifrost/devtools-checker-block/raw/main/Devtools%20Checker%20Block.user.js
+// @updateURL    https://github.com/kapifrost/devtools-checker-block/raw/main/Devtools%20Checker%20Block.user.js
 // @version      1.1
 // @description  Block common DevTools Checker methods
 // @author       kapifrost
